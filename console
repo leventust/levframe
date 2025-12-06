@@ -1,0 +1,45 @@
+#!/usr/bin/env php
+<?php
+
+use Symfony\Component\Console\Application;
+use Illuminate\Support\Facades\Facade;
+
+// Bootstrap application
+/** @var \Core\Application $container */
+$container = require __DIR__ . '/bootstrap/app.php';
+
+$app = new Application('LevFrame', '1.0.0');
+$commands = [
+    'migrate' => \Illuminate\Database\Console\Migrations\MigrateCommand::class,
+    'migrate:install' => \Illuminate\Database\Console\Migrations\InstallCommand::class,
+    'migrate:rollback' => \Illuminate\Database\Console\Migrations\RollbackCommand::class,
+    'migrate:reset' => \Illuminate\Database\Console\Migrations\ResetCommand::class,
+    'migrate:refresh' => \Illuminate\Database\Console\Migrations\RefreshCommand::class,
+    'migrate:fresh' => \Illuminate\Database\Console\Migrations\FreshCommand::class,
+    'migrate:status' => \Illuminate\Database\Console\Migrations\StatusCommand::class,
+    'make:migration' => \Illuminate\Database\Console\Migrations\MigrateMakeCommand::class,
+
+    'make:queue-table' => \Illuminate\Queue\Console\TableCommand::class,
+    'make:queue-failed-table' => \Illuminate\Queue\Console\FailedTableCommand::class,
+    'queue:work' => \Illuminate\Queue\Console\WorkCommand::class,
+    'queue:retry' => \Illuminate\Queue\Console\RetryCommand::class,
+    'queue:forget' => \Illuminate\Queue\Console\ForgetFailedCommand::class,
+    'queue:flush' => \Illuminate\Queue\Console\FlushFailedCommand::class,
+    'queue:failed' => \Illuminate\Queue\Console\ListFailedCommand::class,
+    'queue:restart' => \Illuminate\Queue\Console\RestartCommand::class,
+    'make:job' => \Core\Console\Commands\MakeJobCommand::class,
+    'key:generate' => \Core\Console\Commands\KeyGenerateCommand::class,
+];
+
+foreach ($commands as $command) {
+    if (!$container->bound($command)) {
+        $container->bind($command);
+    }
+}
+
+$app->setCommandLoader(new \Core\Console\ContainerCommandLoader($container, $commands));
+
+// Register manual make:job command since it's not standard
+// $app->add(new \App\Console\Commands\MakeJobCommand($container['files']));
+
+$app->run();
